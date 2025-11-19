@@ -136,7 +136,7 @@
     </header>
     
     <div id="leaderboard-container">
-        <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนครั้งที่เข้าสู่ระบบ)</h2>
+        <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
         <div id="leaderboard-data">
             <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
         </div>
@@ -144,7 +144,7 @@
     <div id="content-wrapper" class="hidden container">
         
         <div id="user-info-bar">
-            <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (จำนวนครั้งที่เข้าสู่ระบบ: <strong id="display-login-count">0</strong> ครั้ง)</span>
+            <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (สถิติการเข้าใช้งาน: <strong id="display-login-count-days">0</strong> วัน)</span>
             <button onclick="localStorage.clear(); window.location.reload();" style="background: none; border: none; color: #856404; cursor: pointer;">(ออกจากระบบ)</button>
         </div>
 
@@ -305,12 +305,13 @@
         const database = firebase.database();
         
         // ====================================================================
-        // 2. AUTHENTICATION & LOGIN COUNT LOGIC (ไม่มีรหัสผ่าน)
+        // 2. AUTHENTICATION & LOGIN COUNT LOGIC (Daily Visit Count)
         // ====================================================================
 
         const CONTENT_WRAPPER = document.getElementById('content-wrapper');
         const DISPLAY_USERNAME = document.getElementById('display-username');
-        const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count');
+        // *** ตำแหน่งที่ 2: เปลี่ยนชื่อ constant ให้ตรงกับ ID ใหม่ ***
+        const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count-days'); 
         const LEADERBOARD_DATA = document.getElementById('leaderboard-data');
         
         let userName = null;
@@ -331,7 +332,6 @@
             let name = prompt("โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับ):");
             
             if (!name || name.trim() === "") {
-                // หากผู้ใช้ไม่กรอกชื่อหรือยกเลิก ให้แจ้งเตือนและลองใหม่
                 alert("กรุณาใส่ชื่อเข้าใช้งานเพื่อติดตามสถิติ!");
                 return askForUsernameAndLogin(); 
             }
@@ -339,74 +339,78 @@
             name = name.trim();
             const uniqueId = hashString(name);
             
-            // บันทึกชื่อและ ID ไว้ใน Local Storage เพื่อให้เข้าครั้งต่อไปได้เลย
+            // บันทึกชื่อและ ID ไว้ใน Local Storage
             localStorage.setItem('homerun_auth_name', name);
             localStorage.setItem('homerun_auth_uid', uniqueId);
 
-            loginSuccess(uniqueId, name, true); // true = เป็นการ login ใหม่
+            loginSuccess(uniqueId, name);
         }
 
-        function loginSuccess(uid, name, isNewLogin = false) {
+        function loginSuccess(uid, name) {
             userUid = uid;
             userName = name;
             
             DISPLAY_USERNAME.textContent = userName;
             CONTENT_WRAPPER.classList.remove('hidden');
             
-            if (isNewLogin) {
-                // เพิ่มคะแนน loginCount ใน Firebase
-                incrementLoginCount();
-            } else {
-                // ถ้าเป็นการโหลดซ้ำ ให้ดึง loginCount มาแสดงเฉยๆ
-                fetchCurrentUserLoginCount(uid);
-            }
+            // *** ตำแหน่งที่ 3: เรียกใช้ฟังก์ชันนับคะแนนรายวันทุกครั้งที่ Login สำเร็จ ***
+            incrementDailyLoginCount(uid, name); 
         }
         
-        function fetchCurrentUserLoginCount(uid) {
-            // ดึงจำนวนครั้งการเข้าสู่ระบบปัจจุบันของผู้ใช้มาแสดง
-            database.ref('leaderboard/' + uid + '/loginCount').once('value', (snapshot) => {
-                const count = snapshot.val() || 0;
-                DISPLAY_LOGIN_COUNT.textContent = count;
-            });
-        }
-        
-        function incrementLoginCount() {
-            if (!userUid) return; 
+        // *** ตำแหน่งที่ 4: ฟังก์ชันใหม่สำหรับการนับคะแนนรายวัน ***
+        function incrementDailyLoginCount(uid, name) {
+            if (!uid) return; 
 
-            const userRef = database.ref('leaderboard/' + userUid);
+            const userRef = database.ref('leaderboard/' + uid);
+            // ใช้วันที่แบบง่าย (DateString) สำหรับเปรียบเทียบว่าเป็นคนละวันหรือไม่
+            const today = new Date().toDateString(); 
 
-            // ใช้ Transaction เพื่อเพิ่มค่า loginCount +1 อย่างปลอดภัย
             userRef.transaction((currentData) => {
                 if (currentData) {
-                    currentData.loginCount = (currentData.loginCount || 0) + 1;
-                    currentData.name = userName; 
-                    currentData.lastLogin = new Date().toISOString();
+                    currentData.name = name; 
+                    
+                    // ตรวจสอบว่าวันที่เข้าชมล่าสุดไม่ใช่วันนี้
+                    if (currentData.lastVisitDate !== today) {
+                        currentData.loginCount = (currentData.loginCount || 0) + 1;
+                        currentData.lastVisitDate = today;
+                    }
+                    currentData.lastLoginTime = new Date().toISOString();
                     return currentData;
                 } else {
+                    // สร้างผู้ใช้ใหม่ (First time login)
                     return {
-                        name: userName,
-                        loginCount: 1,
+                        name: name,
+                        loginCount: 1, // เริ่มต้นที่ 1 วัน
                         firstLogin: new Date().toISOString(),
-                        lastLogin: new Date().toISOString()
+                        lastVisitDate: today
                     };
                 }
             }, (error, committed, snapshot) => {
-                 // อัปเดต UI ด้วยคะแนนใหม่หลังจากบันทึกสำเร็จ
-                if (committed && snapshot.val()) {
-                    DISPLAY_LOGIN_COUNT.textContent = snapshot.val().loginCount;
-                    // อัปเดต Leaderboard ทันทีที่ผู้ใช้ login
+                 // อัปเดต UI ด้วยคะแนนใหม่หลังจากบันทึกสำเร็จ (หรือแม้แต่ถ้าไม่ได้นับเพิ่ม)
+                if (snapshot.val()) {
+                    DISPLAY_LOGIN_COUNT.textContent = snapshot.val().loginCount || 0;
+                    // อัปเดต Leaderboard ทันที
                     fetchAndDisplayLeaderboard(); 
+                } else if (error) {
+                    // กรณีเกิดข้อผิดพลาดในการเขียนข้อมูล
+                    console.error("Transaction failed: ", error);
+                    // พยายามดึงคะแนนล่าสุดมาแสดงหากการ Transaction ล้มเหลว
+                    database.ref('leaderboard/' + uid + '/loginCount').once('value', (s) => {
+                        DISPLAY_LOGIN_COUNT.textContent = s.val() || 0;
+                    });
                 }
             });
         }
+        // *** ลบฟังก์ชัน incrementLoginCount และ fetchCurrentUserLoginCount ตัวเก่าออกไป ***
+
 
         function checkLocalStorageAuth() {
             const storedName = localStorage.getItem('homerun_auth_name');
             const storedUid = localStorage.getItem('homerun_auth_uid');
 
             if (storedName && storedUid) {
-                // ถ้ามีข้อมูลใน Local Storage ให้ login อัตโนมัติ (ไม่นับคะแนนเพิ่ม)
-                loginSuccess(storedUid, storedName, false);
+                // ถ้ามีข้อมูลใน Local Storage ให้ login อัตโนมัติ (และเรียกนับคะแนนรายวัน)
+                loginSuccess(storedUid, storedName);
             } else {
                 // ถ้าไม่มีข้อมูล ให้ขอชื่อผู้ใช้
                 askForUsernameAndLogin();
@@ -421,7 +425,7 @@
         // ====================================================================
 
         function fetchAndDisplayLeaderboard() {
-            // เรียงตาม loginCount จากมากไปน้อย (limitToLast(10) ดึง 10 อันดับแรก)
+            // เรียงตาม loginCount (จำนวนวัน) จากมากไปน้อย (limitToLast(10) ดึง 10 อันดับแรก)
             database.ref('leaderboard').orderByChild('loginCount').limitToLast(10).once('value', (snapshot) => {
                 const leaderboard = [];
                 snapshot.forEach((childSnapshot) => {
@@ -434,7 +438,7 @@
                 leaderboard.sort((a, b) => b.loginCount - a.loginCount); // จัดเรียงอีกครั้งเพื่อให้แน่ใจว่ามากไปน้อย
 
                 let html = '<table class="leaderboard-table">';
-                html += '<thead><tr><th>อันดับ</th><th>ชื่อผู้ใช้งาน</th><th>จำนวนครั้งที่เข้าสู่ระบบ</th></tr></thead><tbody>';
+                html += '<thead><tr><th>อันดับ</th><th>ชื่อผู้ใช้งาน</th><th>จำนวนวันเข้าใช้งาน</th></tr></thead><tbody>'; // *** ตำแหน่งที่ 5: เปลี่ยนหัวตาราง ***
 
                 if (leaderboard.length === 0) {
                     html = '<p style="text-align: center; color: #999; padding: 20px;">ยังไม่มีผู้เข้าร่วมจัดอันดับในขณะนี้!</p>';
@@ -444,8 +448,7 @@
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>${user.name}</td>
-                                <td>${user.loginCount} ครั้ง</td>
-                            </tr>
+                                <td>${user.loginCount} วัน</td> </tr>
                         `;
                     });
                     html += '</tbody></table>';
@@ -455,7 +458,7 @@
 
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config)</p>';
+                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>'; // *** ตำแหน่งที่ 7: เพิ่มคำแนะนำเรื่อง Rules ***
             });
         }
 
