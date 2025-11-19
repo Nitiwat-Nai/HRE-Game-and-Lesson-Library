@@ -186,7 +186,7 @@
             <p>โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับสถิติการเข้าชม)</p>
             <input type="text" id="username-input" placeholder="กรอกชื่อเข้าใช้งานของคุณ" required>
             <p id="login-error-message" style="color: red; margin-bottom: 15px; font-size: 0.9em;" class="hidden">กรุณากรอกชื่อเข้าใช้งาน</p>
-            <button onclick="handleManualLogin()">เข้าสู่ระบบ</button>
+            <button id="login-button" onclick="handleManualLogin()">เข้าสู่ระบบ</button>
         </div>
     </div>
 
@@ -256,6 +256,7 @@
         // ====================================================================
         
         const firebaseConfig = {
+            // *** อย่าลืมแทนที่ด้วย config ของคุณ หากมีการเปลี่ยนแปลง ***
             apiKey: "AIzaSyDYkbaEjaC2RUrv6vaWq4k5psrMr1mCjRE", 
             authDomain: "homerun-english-hub.firebaseapp.com",
             projectId: "homerun-english-hub",
@@ -327,7 +328,7 @@
             
             DISPLAY_USERNAME.textContent = userName;
             CONTENT_WRAPPER.classList.remove('hidden');
-            LOGIN_OVERLAY.classList.add('hidden'); 
+            LOGIN_OVERLAY.classList.add('hidden'); // *** บรรทัดสำคัญที่ซ่อนหน้า Login ***
             
             incrementDailyLoginCount(uid, name); 
         }
@@ -366,6 +367,8 @@
                     fetchAndDisplayLeaderboard(); 
                 } else if (error) {
                     console.error("Transaction failed: ", error);
+                    // หากเกิดข้อผิดพลาดในการเขียนข้อมูล (เช่น Rules บล็อก)
+                    // ยังคงพยายามดึงจำนวนวันล่าสุดมาแสดง
                     database.ref('leaderboard/' + uid + '/loginCount').once('value', (s) => {
                         DISPLAY_LOGIN_COUNT.textContent = s.val() || 0;
                     });
@@ -389,7 +392,7 @@
             
             fetchAndDisplayLeaderboard();
         }
-        
+
         // ====================================================================
         // 6. LEADERBOARD DISPLAY LOGIC
         // ====================================================================
@@ -428,12 +431,27 @@
 
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
+                // ข้อความแจ้งเตือนตามที่คุณแจ้งไว้เมื่อโหลดไม่สำเร็จ
                 LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>';
             });
         }
 
+        // ====================================================================
+        // 7. EVENT LISTENERS (รองรับการกด Enter key)
+        // ====================================================================
+        
+        window.onload = function() {
+            checkLocalStorageAuth();
 
-        window.onload = checkLocalStorageAuth;
+            // เพิ่ม Event Listener สำหรับการกด Enter บนช่อง input
+            USERNAME_INPUT.addEventListener('keypress', function(event) {
+                // KeyCode 13 คือปุ่ม Enter
+                if (event.key === 'Enter') { 
+                    event.preventDefault(); 
+                    handleManualLogin();
+                }
+            });
+        };
     </script>
 </body>
 </html>
