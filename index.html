@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        /* CSS หลัก */
+        /* CSS ทั้งหมด (ไม่มีการเปลี่ยนแปลง) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -38,7 +38,7 @@
             display: none;
         }
         
-        /* 1.2 CSS สำหรับ หน้า Login ซ้อนทับ */
+        /* CSS สำหรับ หน้า Login ซ้อนทับ */
         #login-overlay {
             position: fixed;
             top: 0;
@@ -89,7 +89,7 @@
             background-color: #218838;
         }
 
-        /* CSS เดิมสำหรับ UI และ Leaderboard */
+        /* CSS สำหรับ UI และ Leaderboard */
         #user-info-bar {
             background-color: #fff3cd;
             color: #856404;
@@ -319,6 +319,7 @@
             localStorage.setItem('homerun_auth_name', name);
             localStorage.setItem('homerun_auth_uid', uniqueId);
 
+            // เรียกใช้ฟังก์ชันความสำเร็จทันทีเพื่อซ่อนหน้าจอ
             loginSuccess(uniqueId, name);
         }
 
@@ -328,7 +329,7 @@
             
             DISPLAY_USERNAME.textContent = userName;
             CONTENT_WRAPPER.classList.remove('hidden');
-            LOGIN_OVERLAY.classList.add('hidden'); // *** บรรทัดสำคัญที่ซ่อนหน้า Login ***
+            LOGIN_OVERLAY.classList.add('hidden'); 
             
             incrementDailyLoginCount(uid, name); 
         }
@@ -368,7 +369,6 @@
                 } else if (error) {
                     console.error("Transaction failed: ", error);
                     // หากเกิดข้อผิดพลาดในการเขียนข้อมูล (เช่น Rules บล็อก)
-                    // ยังคงพยายามดึงจำนวนวันล่าสุดมาแสดง
                     database.ref('leaderboard/' + uid + '/loginCount').once('value', (s) => {
                         DISPLAY_LOGIN_COUNT.textContent = s.val() || 0;
                     });
@@ -431,7 +431,6 @@
 
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                // ข้อความแจ้งเตือนตามที่คุณแจ้งไว้เมื่อโหลดไม่สำเร็จ
                 LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>';
             });
         }
