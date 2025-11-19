@@ -6,8 +6,11 @@
     <title>Home-Run English: คลังเกมและบทเรียนพิเศษ</title>
     <link rel="icon" href="https://nitiwat-nai.github.io/favicon.ico" type="image/x-icon">
     
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        /* CSS สำหรับการจัดรูปแบบหน้าเว็บ */
+        /* CSS สำหรับการจัดรูปแบบหน้าเว็บ (เหมือนเดิม) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -16,146 +19,111 @@
             color: #333;
             line-height: 1.6;
         }
-
         .container {
             max-width: 1000px;
             margin: 40px auto;
             padding: 20px;
         }
-
-        /* ส่วนหัว Header */
         header {
-            background-color: #007bff; /* สีน้ำเงินสว่าง */
+            background-color: #007bff;
             color: white;
             padding: 20px 0;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        header h1 {
-            margin: 0;
-            font-size: 2.2em;
-        }
-
-        header p {
-            margin: 5px 0 0;
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
         .header-logo {
-            width: 100px; /* ขนาดของโลโก้ */
-            height: 100px;
-            border-radius: 50%; /* ทำให้เป็นวงกลม */
-            object-fit: cover; /* ครอบคลุมพื้นที่ */
-            margin-bottom: 10px;
-            border: 3px solid rgba(255, 255, 255, 0.5); /* ขอบสีขาวบางๆ */
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid rgba(255, 255, 255, 0.5);
         }
-        
-        /* เนื้อหาหลักที่ถูกซ่อนไว้ก่อนใส่รหัสผ่าน */
         .hidden {
             display: none;
         }
-
-        /* ภาพประกอบ HOME-RUN */
-        .illustration {
-            text-align: center;
-            margin: 30px 0;
+        #user-info-bar {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .illustration img {
-            max-width: 100%; /* ทำให้ภาพปรับขนาดตามความกว้างหน้าจอ */
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
+            max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;
+        }
+        
+        /* 1. CSS สำหรับ Leaderboard */
+        #leaderboard-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            margin-bottom: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        #leaderboard-container h2 {
+            color: #d9534f;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .leaderboard-table th {
+            background-color: #f9f9f9;
+            color: #555;
+            font-weight: bold;
+        }
+        .leaderboard-table tr:nth-child(1) td {
+            font-weight: bold;
+            color: #e6b300; 
+            background-color: #fffac8;
+        }
+        .leaderboard-table tr:nth-child(2) td {
+            color: #a6a6a6; 
+        }
+        .leaderboard-table tr:nth-child(3) td {
+            color: #b87333; 
         }
 
-        /* รายการลิงก์ (Cards) */
+        /* รายการลิงก์ (Cards) - CSS เดิม */
         .link-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             padding-top: 30px;
         }
-
         .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            overflow: hidden;
-            border-left: 5px solid #007bff; /* แถบสีเน้น */
+            background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; border-left: 5px solid #007bff;
         }
-
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
-
         .card-content {
             padding: 20px;
         }
-
         .card-content h3 {
-            color: #007bff;
-            margin-top: 0;
-            font-size: 1.4em;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
+            color: #007bff; margin-top: 0; font-size: 1.4em; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px;
         }
-
         .card-content p {
-            font-size: 0.95em;
-            color: #555;
-            min-height: 40px; /* กำหนดความสูงขั้นต่ำเพื่อให้การ์ดดูเท่ากัน */
+            font-size: 0.95em; color: #555; min-height: 40px;
         }
-
         .card-content a {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745; /* สีเขียวสำหรับปุ่ม */
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-weight: bold;
-            transition: background-color 0.2s;
+            display: block; width: 100%; padding: 10px; background-color: #28a745; color: white; text-align: center; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: bold; transition: background-color 0.2s;
         }
-
         .card-content a:hover {
             background-color: #218838;
         }
-
-        /* ส่วนท้าย Footer */
         footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-            border-top: 1px solid #ddd;
-            font-size: 0.9em;
-            color: #777;
-        }
-        
-        footer a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px 10px;
-                padding: 10px;
-            }
-            header h1 {
-                font-size: 1.8em;
-            }
-            .link-grid {
-                grid-template-columns: 1fr;
-            }
+            text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd; font-size: 0.9em; color: #777;
         }
     </style>
 </head>
@@ -166,9 +134,20 @@
         <h1>Home-Run English</h1>
         <p>คลังเกมและบทเรียนภาษาอังกฤษพิเศษสำหรับผู้ติดตาม</p>
     </header>
-
+    
+    <div id="leaderboard-container">
+        <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนครั้งที่เข้าสู่ระบบ)</h2>
+        <div id="leaderboard-data">
+            <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
     <div id="content-wrapper" class="hidden container">
         
+        <div id="user-info-bar">
+            <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (จำนวนครั้งที่เข้าสู่ระบบ: <strong id="display-login-count">0</strong> ครั้ง)</span>
+            <button onclick="localStorage.clear(); window.location.reload();" style="background: none; border: none; color: #856404; cursor: pointer;">(ออกจากระบบ)</button>
+        </div>
+
         <div class="illustration">
             <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/HOME-RUN.png?raw=true" alt="Home-Run English Illustration">
         </div>
@@ -180,9 +159,9 @@
             
             <div class="card">
                 <div class="card-content">
-                    <h3>Sing Spell Stars</h3>
-                    <p>บทเรียนและการฝึกสะกดคำผ่านบทเพลงที่สนุกสนาน ช่วยให้จำคำศัพท์ได้แม่นยำขึ้น</p>
-                    <a href="https://nitiwat-nai.github.io/Sing-Spell-Stars/" target="_blank">เข้าสู่บทเรียน</a>
+                    <h3>Preposition Master</h3>
+                    <p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p>
+                    <a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เข้าเล่นเกม</a>
                 </div>
             </div>
 
@@ -308,32 +287,180 @@
     </footer>
 
     <script>
-        // JavaScript สำหรับระบบป้องกันรหัสผ่าน
+        // ====================================================================
+        // 1. FIREBASE CONFIG & SETUP (รหัสของคุณถูกใส่ไว้แล้ว)
+        // ====================================================================
         
-        // 1. กำหนดรหัสผ่าน
-        const CORRECT_PASSWORD = "HomeRunEnglish"; 
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYkbaEjaC2RUrv6vaWq4k5psrMr1mCjRE", 
+            authDomain: "homerun-english-hub.firebaseapp.com",
+            projectId: "homerun-english-hub",
+            storageBucket: "homerun-english-hub.appspot.com",
+            messagingSenderId: "83248998338", 
+            appId: "1:83248998338:web:357eab6ce8cd3ad245585b", 
+            databaseURL: "https://homerun-english-hub-default-rtdb.asia-southeast1.firebasedatabase.app" 
+        }; 
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // ====================================================================
+        // 2. AUTHENTICATION & LOGIN COUNT LOGIC (ไม่มีรหัสผ่าน)
+        // ====================================================================
 
-        // 2. ฟังก์ชันตรวจสอบรหัสผ่าน
-        function checkPassword() {
-            // แสดงกล่องข้อความให้ผู้ใช้กรอกรหัสผ่าน
-            const enteredPassword = prompt("🔐 กรุณาใส่รหัสผ่านเพื่อเข้าสู่คลังเกมและบทเรียน Home-Run English:");
-            const contentWrapper = document.getElementById('content-wrapper');
-
-            if (enteredPassword === CORRECT_PASSWORD) {
-                // รหัสผ่านถูกต้อง: แสดงเนื้อหาหลัก
-                contentWrapper.classList.remove('hidden');
-            } else {
-                // รหัสผ่านไม่ถูกต้อง: แจ้งเตือน
-                alert("รหัสผ่านไม่ถูกต้อง! กรุณาตรวจสอบรหัสผ่านและลองอีกครั้ง");
-                
-                // (ทางเลือก: ปิดหน้าเว็บ หรือ redirect ไปที่อื่น)
-                // window.close(); 
-                // window.location.href = "https://facebook.com/your-page"; 
+        const CONTENT_WRAPPER = document.getElementById('content-wrapper');
+        const DISPLAY_USERNAME = document.getElementById('display-username');
+        const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count');
+        const LEADERBOARD_DATA = document.getElementById('leaderboard-data');
+        
+        let userName = null;
+        let userUid = null;
+        
+        function hashString(str) {
+            // สร้าง Unique ID จากชื่อผู้ใช้ (ใช้แทน UID)
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash<<5)-hash)+char;
+                hash = hash & hash;
             }
+            return Math.abs(hash).toString(36) + '-' + str.replace(/[^a-zA-Z0-9]/g, '').substring(0, 5);
         }
 
-        // 3. เรียกใช้ฟังก์ชันทันทีที่หน้าเว็บโหลดเสร็จ
-        window.onload = checkPassword; 
+        function askForUsernameAndLogin() {
+            let name = prompt("โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับ):");
+            
+            if (!name || name.trim() === "") {
+                // หากผู้ใช้ไม่กรอกชื่อหรือยกเลิก ให้แจ้งเตือนและลองใหม่
+                alert("กรุณาใส่ชื่อเข้าใช้งานเพื่อติดตามสถิติ!");
+                return askForUsernameAndLogin(); 
+            }
+
+            name = name.trim();
+            const uniqueId = hashString(name);
+            
+            // บันทึกชื่อและ ID ไว้ใน Local Storage เพื่อให้เข้าครั้งต่อไปได้เลย
+            localStorage.setItem('homerun_auth_name', name);
+            localStorage.setItem('homerun_auth_uid', uniqueId);
+
+            loginSuccess(uniqueId, name, true); // true = เป็นการ login ใหม่
+        }
+
+        function loginSuccess(uid, name, isNewLogin = false) {
+            userUid = uid;
+            userName = name;
+            
+            DISPLAY_USERNAME.textContent = userName;
+            CONTENT_WRAPPER.classList.remove('hidden');
+            
+            if (isNewLogin) {
+                // เพิ่มคะแนน loginCount ใน Firebase
+                incrementLoginCount();
+            } else {
+                // ถ้าเป็นการโหลดซ้ำ ให้ดึง loginCount มาแสดงเฉยๆ
+                fetchCurrentUserLoginCount(uid);
+            }
+        }
+        
+        function fetchCurrentUserLoginCount(uid) {
+            // ดึงจำนวนครั้งการเข้าสู่ระบบปัจจุบันของผู้ใช้มาแสดง
+            database.ref('leaderboard/' + uid + '/loginCount').once('value', (snapshot) => {
+                const count = snapshot.val() || 0;
+                DISPLAY_LOGIN_COUNT.textContent = count;
+            });
+        }
+        
+        function incrementLoginCount() {
+            if (!userUid) return; 
+
+            const userRef = database.ref('leaderboard/' + userUid);
+
+            // ใช้ Transaction เพื่อเพิ่มค่า loginCount +1 อย่างปลอดภัย
+            userRef.transaction((currentData) => {
+                if (currentData) {
+                    currentData.loginCount = (currentData.loginCount || 0) + 1;
+                    currentData.name = userName; 
+                    currentData.lastLogin = new Date().toISOString();
+                    return currentData;
+                } else {
+                    return {
+                        name: userName,
+                        loginCount: 1,
+                        firstLogin: new Date().toISOString(),
+                        lastLogin: new Date().toISOString()
+                    };
+                }
+            }, (error, committed, snapshot) => {
+                 // อัปเดต UI ด้วยคะแนนใหม่หลังจากบันทึกสำเร็จ
+                if (committed && snapshot.val()) {
+                    DISPLAY_LOGIN_COUNT.textContent = snapshot.val().loginCount;
+                    // อัปเดต Leaderboard ทันทีที่ผู้ใช้ login
+                    fetchAndDisplayLeaderboard(); 
+                }
+            });
+        }
+
+        function checkLocalStorageAuth() {
+            const storedName = localStorage.getItem('homerun_auth_name');
+            const storedUid = localStorage.getItem('homerun_auth_uid');
+
+            if (storedName && storedUid) {
+                // ถ้ามีข้อมูลใน Local Storage ให้ login อัตโนมัติ (ไม่นับคะแนนเพิ่ม)
+                loginSuccess(storedUid, storedName, false);
+            } else {
+                // ถ้าไม่มีข้อมูล ให้ขอชื่อผู้ใช้
+                askForUsernameAndLogin();
+            }
+            
+            // ดึง Leaderboard มาแสดงให้ทุกคนเห็นเสมอ
+            fetchAndDisplayLeaderboard();
+        }
+        
+        // ====================================================================
+        // 3. LEADERBOARD DISPLAY LOGIC
+        // ====================================================================
+
+        function fetchAndDisplayLeaderboard() {
+            // เรียงตาม loginCount จากมากไปน้อย (limitToLast(10) ดึง 10 อันดับแรก)
+            database.ref('leaderboard').orderByChild('loginCount').limitToLast(10).once('value', (snapshot) => {
+                const leaderboard = [];
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    if (data.loginCount > 0) {
+                        leaderboard.push(data);
+                    }
+                });
+
+                leaderboard.sort((a, b) => b.loginCount - a.loginCount); // จัดเรียงอีกครั้งเพื่อให้แน่ใจว่ามากไปน้อย
+
+                let html = '<table class="leaderboard-table">';
+                html += '<thead><tr><th>อันดับ</th><th>ชื่อผู้ใช้งาน</th><th>จำนวนครั้งที่เข้าสู่ระบบ</th></tr></thead><tbody>';
+
+                if (leaderboard.length === 0) {
+                    html = '<p style="text-align: center; color: #999; padding: 20px;">ยังไม่มีผู้เข้าร่วมจัดอันดับในขณะนี้!</p>';
+                } else {
+                    leaderboard.forEach((user, index) => {
+                        html += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${user.name}</td>
+                                <td>${user.loginCount} ครั้ง</td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                }
+
+                LEADERBOARD_DATA.innerHTML = html;
+
+            }, (error) => {
+                console.error("Error fetching leaderboard:", error);
+                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config)</p>';
+            });
+        }
+
+
+        window.onload = checkLocalStorageAuth;
     </script>
 </body>
 </html>
