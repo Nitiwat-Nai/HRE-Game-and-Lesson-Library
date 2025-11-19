@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        /* CSS สำหรับการจัดรูปแบบหน้าเว็บ (เหมือนเดิม) */
+        /* CSS หลัก */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -37,6 +37,59 @@
         .hidden {
             display: none;
         }
+        
+        /* 1.2 CSS สำหรับ หน้า Login ซ้อนทับ */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* ให้ทับทุกอย่าง */
+        }
+        .login-box {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: fadeIn 0.5s;
+        }
+        .login-box h3 {
+            color: #007bff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-box button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
+        }
+        .login-box button:hover {
+            background-color: #218838;
+        }
+
+        /* CSS เดิมสำหรับ UI และ Leaderboard */
         #user-info-bar {
             background-color: #fff3cd;
             color: #856404;
@@ -47,11 +100,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .illustration img {
-            max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;
-        }
+        /* ... (CSS Leaderboard และ Card ต่างๆ เหมือนเดิม) ... */
         
-        /* 1. CSS สำหรับ Leaderboard */
         #leaderboard-container {
             max-width: 1000px;
             margin: 40px auto;
@@ -94,7 +144,6 @@
             color: #b87333; 
         }
 
-        /* รายการลิงก์ (Cards) - CSS เดิม */
         .link-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -125,170 +174,83 @@
         footer {
             text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd; font-size: 0.9em; color: #777;
         }
+        .illustration img {
+            max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/Logo.png?raw=true" alt="Home-Run English Logo" class="header-logo">
-        <h1>Home-Run English</h1>
-        <p>คลังเกมและบทเรียนภาษาอังกฤษพิเศษสำหรับผู้ติดตาม</p>
-    </header>
-    
-    <div id="leaderboard-container">
-        <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
-        <div id="leaderboard-data">
-            <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+    <div id="login-overlay" class="hidden">
+        <div class="login-box">
+            <h3>🔑 ยืนยันตัวตนเพื่อเข้าสู่คลังเกม</h3>
+            <p>โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับสถิติการเข้าชม)</p>
+            <input type="text" id="username-input" placeholder="กรอกชื่อเข้าใช้งานของคุณ" required>
+            <p id="login-error-message" style="color: red; margin-bottom: 15px; font-size: 0.9em;" class="hidden">กรุณากรอกชื่อเข้าใช้งาน</p>
+            <button onclick="handleManualLogin()">เข้าสู่ระบบ</button>
         </div>
     </div>
-    <div id="content-wrapper" class="hidden container">
+
+    <div id="main-content">
+        <header>
+            <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/Logo.png?raw=true" alt="Home-Run English Logo" class="header-logo">
+            <h1>Home-Run English</h1>
+            <p>คลังเกมและบทเรียนภาษาอังกฤษพิเศษสำหรับผู้ติดตาม</p>
+        </header>
         
-        <div id="user-info-bar">
-            <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (สถิติการเข้าใช้งาน: <strong id="display-login-count-days">0</strong> วัน)</span>
-            <button onclick="localStorage.clear(); window.location.reload();" style="background: none; border: none; color: #856404; cursor: pointer;">(ออกจากระบบ)</button>
+        <div id="leaderboard-container">
+            <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
+            <div id="leaderboard-data">
+                <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+            </div>
         </div>
 
-        <div class="illustration">
-            <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/HOME-RUN.png?raw=true" alt="Home-Run English Illustration">
+        <div id="content-wrapper" class="hidden container">
+            
+            <div id="user-info-bar">
+                <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (สถิติการเข้าใช้งาน: <strong id="display-login-count-days">0</strong> วัน)</span>
+                <button onclick="localStorage.clear(); window.location.reload();" style="background: none; border: none; color: #856404; cursor: pointer;">(ออกจากระบบ)</button>
+            </div>
+
+            <div class="illustration">
+                <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/HOME-RUN.png?raw=true" alt="Home-Run English Illustration">
+            </div>
+
+            <h2>🚀 เลือกเกมหรือบทเรียนที่ต้องการได้เลย</h2>
+            <p>เพื่อประสบการณ์การเรียนรู้ที่สนุกสนานและมีประสิทธิภาพ! (คลิกที่ปุ่ม 'เข้าเล่น' ด้านล่างแต่ละหัวข้อ)</p>
+            
+            <div class="link-grid">
+                
+                <div class="card"><div class="card-content"><h3>Preposition Master</h3><p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p><a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Word Icons Match Game</h3><p>เกมจับคู่คำศัพท์กับไอคอนสนุก ๆ ฝึกทักษะการจำคำนามและกริยาพื้นฐาน</p><a href="https://nitiwat-nai.github.io/Word-Icons-Match-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Irregular Verbs (กริยา 3 ช่อง)</h3><p>บทเรียนและแบบฝึกหัดสำคัญสำหรับกริยาที่ไม่ปกติ (Irregular Verbs) ที่ใช้บ่อย</p><a href="https://nitiwat-nai.github.io/Irregular-Verbs/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                <div class="card"><div class="card-content"><h3>Word Search Game (ค้นหาคำศัพท์)</h3><p>เกมค้นหาคำศัพท์สุดคลาสสิก เพื่อฝึกการสังเกตและจดจำตัวสะกด</p><a href="https://nitiwat-nai.github.io/Word-Search-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>WordWise Hangman</h3><p>เกมแขวนคอในรูปแบบที่ออกแบบมาเพื่อฝึกการเดาคำศัพท์จากบริบท</p><a href="https://nitiwat-nai.github.io/WordWise-Hangman/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Puzzle Word Trace</h3><p>เกมต่อคำศัพท์แบบปริศนา ฝึกการจัดเรียงตัวอักษรให้เป็นคำที่ถูกต้อง</p><a href="https://nitiwat-nai.github.io/Puzzle-Word-Trace/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Alternatives to Very Challenge</h3><p>บทเรียนท้าทายเพื่อเรียนรู้คำศัพท์ขั้นสูง แทนการใช้คำว่า "Very" ซ้ำ ๆ</p><a href="https://nitiwat-nai.github.io/Alternatives-to-Very-Challenge/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                <div class="card"><div class="card-content"><h3>Antonyms Quiz Challenge</h3><p>แบบทดสอบท้าทายความรู้คำศัพท์ตรงข้าม (Antonyms) เพื่อเพิ่มคลังคำศัพท์</p><a href="https://nitiwat-nai.github.io/Antonyms-Quiz-Challenge/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>A-Z Alphabet Fun</h3><p>บทเรียนและเกมสนุก ๆ สำหรับเด็ก เพื่อเรียนรู้ตัวอักษร A-Z และคำศัพท์พื้นฐาน</p><a href="https://nitiwat-nai.github.io/a-z-alphabet-fun/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Homophones Game</h3><p>เกมทดสอบความเข้าใจคำที่มีเสียงเหมือนแต่ความหมายและสะกดต่างกัน (Homophones)</p><a href="https://nitiwat-nai.github.io/homophones-game/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Vocab for Kids (คำศัพท์เด็ก)</h3><p>ชุดคำศัพท์ที่ออกแบบมาสำหรับเด็กโดยเฉพาะ พร้อมภาพประกอบน่ารัก</p><a href="https://nitiwat-nai.github.io/vocab-for-kids/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                <div class="card"><div class="card-content"><h3>Word Journey</h3><p>การเดินทางของคำศัพท์ ที่ให้ผู้เรียนค้นพบคำใหม่ ๆ ในแต่ละก้าว</p><a href="https://nitiwat-nai.github.io/word-Journey/" target="_blank">เข้าสู่เกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Vocab for Kids: Sentence Building</h3><p>ฝึกการสร้างประโยคพื้นฐานสำหรับเด็ก โดยใช้คำศัพท์ที่เรียนรู้มา</p><a href="https://nitiwat-nai.github.io/vocap-for-kids-sentence/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                <div class="card"><div class="card-content"><h3>Word Pop Match</h3><p>เกมจับคู่คำศัพท์แบบป๊อปอัป ที่ต้องความเร็วและความแม่นยำ</p><a href="https://nitiwat-nai.github.io/word-pop-match/" target="_blank">เข้าเล่นเกม</a></div></div>
+                <div class="card"><div class="card-content"><h3>Word Journey Prefix</h3><p>การเรียนรู้คำศัพท์จากการทำความเข้าใจส่วนนำหน้า (Prefix) ของคำ</p><a href="https://nitiwat-nai.github.io/word-journey-prefix/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                
+            </div>
+
         </div>
 
-        <h2>🚀 เลือกเกมหรือบทเรียนที่ต้องการได้เลย</h2>
-        <p>เพื่อประสบการณ์การเรียนรู้ที่สนุกสนานและมีประสิทธิภาพ! (คลิกที่ปุ่ม 'เข้าเล่น' ด้านล่างแต่ละหัวข้อ)</p>
-        
-        <div class="link-grid">
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Preposition Master</h3>
-                    <p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p>
-                    <a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>Word Icons Match Game</h3>
-                    <p>เกมจับคู่คำศัพท์กับไอคอนสนุก ๆ ฝึกทักษะการจำคำนามและกริยาพื้นฐาน</p>
-                    <a href="https://nitiwat-nai.github.io/Word-Icons-Match-Game/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Irregular Verbs (กริยา 3 ช่อง)</h3>
-                    <p>บทเรียนและแบบฝึกหัดสำคัญสำหรับกริยาที่ไม่ปกติ (Irregular Verbs) ที่ใช้บ่อย</p>
-                    <a href="https://nitiwat-nai.github.io/Irregular-Verbs/" target="_blank">เข้าสู่บทเรียน</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>Word Search Game (ค้นหาคำศัพท์)</h3>
-                    <p>เกมค้นหาคำศัพท์สุดคลาสสิก เพื่อฝึกการสังเกตและจดจำตัวสะกด</p>
-                    <a href="https://nitiwat-nai.github.io/Word-Search-Game/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>WordWise Hangman</h3>
-                    <p>เกมแขวนคอในรูปแบบที่ออกแบบมาเพื่อฝึกการเดาคำศัพท์จากบริบท</p>
-                    <a href="https://nitiwat-nai.github.io/WordWise-Hangman/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>Puzzle Word Trace</h3>
-                    <p>เกมต่อคำศัพท์แบบปริศนา ฝึกการจัดเรียงตัวอักษรให้เป็นคำที่ถูกต้อง</p>
-                    <a href="https://nitiwat-nai.github.io/Puzzle-Word-Trace/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>Alternatives to Very Challenge</h3>
-                    <p>บทเรียนท้าทายเพื่อเรียนรู้คำศัพท์ขั้นสูง แทนการใช้คำว่า "Very" ซ้ำ ๆ</p>
-                    <a href="https://nitiwat-nai.github.io/Alternatives-to-Very-Challenge/" target="_blank">เข้าสู่บทเรียน</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>Antonyms Quiz Challenge</h3>
-                    <p>แบบทดสอบท้าทายความรู้คำศัพท์ตรงข้าม (Antonyms) เพื่อเพิ่มคลังคำศัพท์</p>
-                    <a href="https://nitiwat-nai.github.io/Antonyms-Quiz-Challenge/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <h3>A-Z Alphabet Fun</h3>
-                    <p>บทเรียนและเกมสนุก ๆ สำหรับเด็ก เพื่อเรียนรู้ตัวอักษร A-Z และคำศัพท์พื้นฐาน</p>
-                    <a href="https://nitiwat-nai.github.io/a-z-alphabet-fun/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Homophones Game</h3>
-                    <p>เกมทดสอบความเข้าใจคำที่มีเสียงเหมือนแต่ความหมายและสะกดต่างกัน (Homophones)</p>
-                    <a href="https://nitiwat-nai.github.io/homophones-game/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Vocab for Kids (คำศัพท์เด็ก)</h3>
-                    <p>ชุดคำศัพท์ที่ออกแบบมาสำหรับเด็กโดยเฉพาะ พร้อมภาพประกอบน่ารัก</p>
-                    <a href="https://nitiwat-nai.github.io/vocab-for-kids/" target="_blank">เข้าสู่บทเรียน</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Word Journey</h3>
-                    <p>การเดินทางของคำศัพท์ ที่ให้ผู้เรียนค้นพบคำใหม่ ๆ ในแต่ละก้าว</p>
-                    <a href="https://nitiwat-nai.github.io/word-Journey/" target="_blank">เข้าสู่เกม</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Vocab for Kids: Sentence Building</h3>
-                    <p>ฝึกการสร้างประโยคพื้นฐานสำหรับเด็ก โดยใช้คำศัพท์ที่เรียนรู้มา</p>
-                    <a href="https://nitiwat-nai.github.io/vocap-for-kids-sentence/" target="_blank">เข้าสู่บทเรียน</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Word Pop Match</h3>
-                    <p>เกมจับคู่คำศัพท์แบบป๊อปอัป ที่ต้องความเร็วและความแม่นยำ</p>
-                    <a href="https://nitiwat-nai.github.io/word-pop-match/" target="_blank">เข้าเล่นเกม</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-content">
-                    <h3>Word Journey Prefix</h3>
-                    <p>การเรียนรู้คำศัพท์จากการทำความเข้าใจส่วนนำหน้า (Prefix) ของคำ</p>
-                    <a href="https://nitiwat-nai.github.io/word-journey-prefix/" target="_blank">เข้าสู่บทเรียน</a>
-                </div>
-            </div>
-            
-        </div>
-
+        <footer>
+            <p>&copy; 2025 Home-Run English. เข้าชมเพจ: <a href="[ใส่ลิงก์เพจ Facebook ของคุณที่นี่]" target="_blank">Home-Run English Facebook Page</a></p>
+            <p>สร้างขึ้นเพื่อการเรียนรู้ภาษาอังกฤษอย่างสนุกสนาน</p>
+        </footer>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Home-Run English. เข้าชมเพจ: <a href="[ใส่ลิงก์เพจ Facebook ของคุณที่นี่]" target="_blank">Home-Run English Facebook Page</a></p>
-        <p>สร้างขึ้นเพื่อการเรียนรู้ภาษาอังกฤษอย่างสนุกสนาน</p>
-    </footer>
 
     <script>
         // ====================================================================
-        // 1. FIREBASE CONFIG & SETUP (รหัสของคุณถูกใส่ไว้แล้ว)
+        // 1. FIREBASE CONFIG & SETUP (รหัสของคุณ)
         // ====================================================================
         
         const firebaseConfig = {
@@ -305,20 +267,21 @@
         const database = firebase.database();
         
         // ====================================================================
-        // 2. AUTHENTICATION & LOGIN COUNT LOGIC (Daily Visit Count)
+        // 2. CONSTANTS & UI ELEMENTS
         // ====================================================================
 
         const CONTENT_WRAPPER = document.getElementById('content-wrapper');
         const DISPLAY_USERNAME = document.getElementById('display-username');
-        // *** ตำแหน่งที่ 2: เปลี่ยนชื่อ constant ให้ตรงกับ ID ใหม่ ***
         const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count-days'); 
         const LEADERBOARD_DATA = document.getElementById('leaderboard-data');
+        const LOGIN_OVERLAY = document.getElementById('login-overlay');
+        const USERNAME_INPUT = document.getElementById('username-input');
+        const LOGIN_ERROR_MESSAGE = document.getElementById('login-error-message');
         
         let userName = null;
         let userUid = null;
         
         function hashString(str) {
-            // สร้าง Unique ID จากชื่อผู้ใช้ (ใช้แทน UID)
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 const char = str.charCodeAt(i);
@@ -328,15 +291,25 @@
             return Math.abs(hash).toString(36) + '-' + str.replace(/[^a-zA-Z0-9]/g, '').substring(0, 5);
         }
 
-        function askForUsernameAndLogin() {
-            let name = prompt("โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับ):");
-            
-            if (!name || name.trim() === "") {
-                alert("กรุณาใส่ชื่อเข้าใช้งานเพื่อติดตามสถิติ!");
-                return askForUsernameAndLogin(); 
-            }
+        // ====================================================================
+        // 3. LOGIN FUNCTIONS (ใช้หน้าจอแทน prompt)
+        // ====================================================================
+        
+        function showLoginScreen() {
+            LOGIN_OVERLAY.classList.remove('hidden');
+            CONTENT_WRAPPER.classList.add('hidden'); // ซ่อนเนื้อหาหลัก
+            USERNAME_INPUT.focus();
+        }
 
-            name = name.trim();
+        function handleManualLogin() {
+            const name = USERNAME_INPUT.value.trim();
+            
+            if (!name) {
+                LOGIN_ERROR_MESSAGE.classList.remove('hidden');
+                return;
+            }
+            
+            LOGIN_ERROR_MESSAGE.classList.add('hidden');
             const uniqueId = hashString(name);
             
             // บันทึกชื่อและ ID ไว้ใน Local Storage
@@ -352,24 +325,26 @@
             
             DISPLAY_USERNAME.textContent = userName;
             CONTENT_WRAPPER.classList.remove('hidden');
+            LOGIN_OVERLAY.classList.add('hidden'); // ซ่อนหน้า Login
             
-            // *** ตำแหน่งที่ 3: เรียกใช้ฟังก์ชันนับคะแนนรายวันทุกครั้งที่ Login สำเร็จ ***
+            // เรียกใช้ฟังก์ชันนับคะแนนรายวัน
             incrementDailyLoginCount(uid, name); 
         }
         
-        // *** ตำแหน่งที่ 4: ฟังก์ชันใหม่สำหรับการนับคะแนนรายวัน ***
+        // ====================================================================
+        // 4. DAILY VISIT COUNT LOGIC
+        // ====================================================================
+        
         function incrementDailyLoginCount(uid, name) {
             if (!uid) return; 
 
             const userRef = database.ref('leaderboard/' + uid);
-            // ใช้วันที่แบบง่าย (DateString) สำหรับเปรียบเทียบว่าเป็นคนละวันหรือไม่
             const today = new Date().toDateString(); 
 
             userRef.transaction((currentData) => {
                 if (currentData) {
                     currentData.name = name; 
                     
-                    // ตรวจสอบว่าวันที่เข้าชมล่าสุดไม่ใช่วันนี้
                     if (currentData.lastVisitDate !== today) {
                         currentData.loginCount = (currentData.loginCount || 0) + 1;
                         currentData.lastVisitDate = today;
@@ -377,55 +352,50 @@
                     currentData.lastLoginTime = new Date().toISOString();
                     return currentData;
                 } else {
-                    // สร้างผู้ใช้ใหม่ (First time login)
                     return {
                         name: name,
-                        loginCount: 1, // เริ่มต้นที่ 1 วัน
+                        loginCount: 1, 
                         firstLogin: new Date().toISOString(),
                         lastVisitDate: today
                     };
                 }
             }, (error, committed, snapshot) => {
-                 // อัปเดต UI ด้วยคะแนนใหม่หลังจากบันทึกสำเร็จ (หรือแม้แต่ถ้าไม่ได้นับเพิ่ม)
                 if (snapshot.val()) {
                     DISPLAY_LOGIN_COUNT.textContent = snapshot.val().loginCount || 0;
-                    // อัปเดต Leaderboard ทันที
                     fetchAndDisplayLeaderboard(); 
                 } else if (error) {
-                    // กรณีเกิดข้อผิดพลาดในการเขียนข้อมูล
                     console.error("Transaction failed: ", error);
-                    // พยายามดึงคะแนนล่าสุดมาแสดงหากการ Transaction ล้มเหลว
                     database.ref('leaderboard/' + uid + '/loginCount').once('value', (s) => {
                         DISPLAY_LOGIN_COUNT.textContent = s.val() || 0;
                     });
                 }
             });
         }
-        // *** ลบฟังก์ชัน incrementLoginCount และ fetchCurrentUserLoginCount ตัวเก่าออกไป ***
 
+        // ====================================================================
+        // 5. MAIN AUTH CHECK
+        // ====================================================================
 
         function checkLocalStorageAuth() {
             const storedName = localStorage.getItem('homerun_auth_name');
             const storedUid = localStorage.getItem('homerun_auth_uid');
 
             if (storedName && storedUid) {
-                // ถ้ามีข้อมูลใน Local Storage ให้ login อัตโนมัติ (และเรียกนับคะแนนรายวัน)
+                // ล็อกอินอัตโนมัติ (และเรียกนับคะแนนรายวัน)
                 loginSuccess(storedUid, storedName);
             } else {
-                // ถ้าไม่มีข้อมูล ให้ขอชื่อผู้ใช้
-                askForUsernameAndLogin();
+                // ถ้าไม่มีข้อมูล ให้แสดงหน้า Login
+                showLoginScreen(); 
             }
             
-            // ดึง Leaderboard มาแสดงให้ทุกคนเห็นเสมอ
             fetchAndDisplayLeaderboard();
         }
         
         // ====================================================================
-        // 3. LEADERBOARD DISPLAY LOGIC
+        // 6. LEADERBOARD DISPLAY LOGIC
         // ====================================================================
 
         function fetchAndDisplayLeaderboard() {
-            // เรียงตาม loginCount (จำนวนวัน) จากมากไปน้อย (limitToLast(10) ดึง 10 อันดับแรก)
             database.ref('leaderboard').orderByChild('loginCount').limitToLast(10).once('value', (snapshot) => {
                 const leaderboard = [];
                 snapshot.forEach((childSnapshot) => {
@@ -435,10 +405,10 @@
                     }
                 });
 
-                leaderboard.sort((a, b) => b.loginCount - a.loginCount); // จัดเรียงอีกครั้งเพื่อให้แน่ใจว่ามากไปน้อย
+                leaderboard.sort((a, b) => b.loginCount - a.loginCount);
 
                 let html = '<table class="leaderboard-table">';
-                html += '<thead><tr><th>อันดับ</th><th>ชื่อผู้ใช้งาน</th><th>จำนวนวันเข้าใช้งาน</th></tr></thead><tbody>'; // *** ตำแหน่งที่ 5: เปลี่ยนหัวตาราง ***
+                html += '<thead><tr><th>อันดับ</th><th>ชื่อผู้ใช้งาน</th><th>จำนวนวันเข้าใช้งาน</th></tr></thead><tbody>';
 
                 if (leaderboard.length === 0) {
                     html = '<p style="text-align: center; color: #999; padding: 20px;">ยังไม่มีผู้เข้าร่วมจัดอันดับในขณะนี้!</p>';
@@ -448,7 +418,8 @@
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>${user.name}</td>
-                                <td>${user.loginCount} วัน</td> </tr>
+                                <td>${user.loginCount} วัน</td>
+                            </tr>
                         `;
                     });
                     html += '</tbody></table>';
@@ -458,7 +429,7 @@
 
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>'; // *** ตำแหน่งที่ 7: เพิ่มคำแนะนำเรื่อง Rules ***
+                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>';
             });
         }
 
