@@ -38,35 +38,23 @@
             display: none;
         }
         
-        /* CSS สำหรับ หน้า Login ซ้อนทับ */
-        #login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000; 
-        }
-        .login-box {
+        /* CSS สำหรับ ฟอร์ม Login ในหน้าหลัก */
+        #login-form-container {
             background-color: white;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             text-align: center;
-            max-width: 400px;
+            max-width: 500px; /* ขยายกว้างกว่า login-box เดิมเล็กน้อย */
             width: 90%;
-            animation: fadeIn 0.5s;
+            margin: 40px auto; /* จัดให้อยู่กลางหน้า */
         }
-        .login-box h3 {
+        #login-form-container h3 {
             color: #007bff;
             margin-bottom: 20px;
             font-size: 1.5em;
         }
-        .login-box input {
+        #login-form-container input {
             width: 100%;
             padding: 12px;
             margin-bottom: 20px;
@@ -75,7 +63,7 @@
             box-sizing: border-box;
             font-size: 1em;
         }
-        .login-box button {
+        #login-form-container button {
             background-color: #28a745;
             color: white;
             border: none;
@@ -85,7 +73,7 @@
             font-size: 1.1em;
             transition: background-color 0.3s;
         }
-        .login-box button:hover {
+        #login-form-container button:hover {
             background-color: #218838;
         }
 
@@ -180,16 +168,6 @@
 </head>
 <body>
 
-    <div id="login-overlay" class="hidden">
-        <div class="login-box">
-            <h3>🔑 ยืนยันตัวตนเพื่อเข้าสู่คลังเกม</h3>
-            <p>โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับสถิติการเข้าชม)</p>
-            <input type="text" id="username-input" placeholder="กรอกชื่อเข้าใช้งานของคุณ" required>
-            <p id="login-error-message" style="color: red; margin-bottom: 15px; font-size: 0.9em;" class="hidden">กรุณากรอกชื่อเข้าใช้งาน</p>
-            <button id="login-button" onclick="handleManualLogin()">เข้าสู่ระบบ</button>
-        </div>
-    </div>
-
     <div id="main-content">
         <header>
             <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/Logo.png?raw=true" alt="Home-Run English Logo" class="header-logo">
@@ -198,12 +176,21 @@
         </header>
         
         <div id="leaderboard-container">
-            <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
-            <div id="leaderboard-data">
-                <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+            <div id="login-form-container">
+                <h3>🔑 ยืนยันตัวตนเพื่อเข้าสู่คลังเกม</h3>
+                <p>โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับสถิติการเข้าชม)</p>
+                <input type="text" id="username-input" placeholder="กรอกชื่อเข้าใช้งานของคุณ" required>
+                <p id="login-error-message" style="color: red; margin-bottom: 15px; font-size: 0.9em;" class="hidden">กรุณากรอกชื่อเข้าใช้งาน</p>
+                <button id="login-button" onclick="handleManualLogin()">เข้าสู่ระบบ</button>
+            </div>
+
+            <div id="leaderboard-display" class="hidden">
+                <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
+                <div id="leaderboard-data">
+                    <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+                </div>
             </div>
         </div>
-
         <div id="content-wrapper" class="hidden container">
             
             <div id="user-info-bar">
@@ -276,10 +263,12 @@
         const CONTENT_WRAPPER = document.getElementById('content-wrapper');
         const DISPLAY_USERNAME = document.getElementById('display-username');
         const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count-days'); 
+        const LEADERBOARD_DISPLAY = document.getElementById('leaderboard-display'); // องค์ประกอบใหม่สำหรับแสดงตารางอันดับ
         const LEADERBOARD_DATA = document.getElementById('leaderboard-data');
-        const LOGIN_OVERLAY = document.getElementById('login-overlay');
+        const LOGIN_FORM_CONTAINER = document.getElementById('login-form-container'); // องค์ประกอบใหม่สำหรับฟอร์ม Login
         const USERNAME_INPUT = document.getElementById('username-input');
         const LOGIN_ERROR_MESSAGE = document.getElementById('login-error-message');
+        const USER_INFO_BAR = document.getElementById('user-info-bar');
         
         let userName = null;
         let userUid = null;
@@ -299,9 +288,10 @@
         // 3. LOGIN FUNCTIONS (Inline Login)
         // ====================================================================
         
-        function showLoginScreen() {
-            LOGIN_OVERLAY.classList.remove('hidden');
-            CONTENT_WRAPPER.classList.add('hidden'); 
+        function showLoginForm() {
+            LOGIN_FORM_CONTAINER.classList.remove('hidden'); // แสดงฟอร์ม Login
+            LEADERBOARD_DISPLAY.classList.add('hidden');    // ซ่อนตารางอันดับ
+            CONTENT_WRAPPER.classList.add('hidden');        // ซ่อนเนื้อหาหลัก
             USERNAME_INPUT.focus();
         }
 
@@ -319,10 +309,11 @@
             localStorage.setItem('homerun_auth_name', name);
             localStorage.setItem('homerun_auth_uid', uniqueId);
             
-            // *** การแก้ไข: ซ่อนหน้าจอและแสดงเนื้อหาหลักทันที ***
-            CONTENT_WRAPPER.classList.remove('hidden');
-            LOGIN_OVERLAY.classList.add('hidden'); 
-            
+            // *** คำสั่งสำคัญ: เมื่อล็อกอินสำเร็จ ให้แสดงเนื้อหาหลักและตารางอันดับ ***
+            LOGIN_FORM_CONTAINER.classList.add('hidden');       // ซ่อนฟอร์ม Login
+            LEADERBOARD_DISPLAY.classList.remove('hidden');     // แสดงตารางอันดับ
+            CONTENT_WRAPPER.classList.remove('hidden');         // แสดงเนื้อหาหลัก
+
             loginSuccess(uniqueId, name);
         }
 
@@ -387,15 +378,17 @@
             const storedUid = localStorage.getItem('homerun_auth_uid');
 
             if (storedName && storedUid) {
-                // *** คำสั่งสำคัญ: สำหรับกรณีที่มีข้อมูลค้างใน Local Storage ***
-                CONTENT_WRAPPER.classList.remove('hidden');
-                LOGIN_OVERLAY.classList.add('hidden'); 
+                // เมื่อมีข้อมูลเก่า ให้แสดงเนื้อหาหลักและซ่อนฟอร์ม Login
+                LOGIN_FORM_CONTAINER.classList.add('hidden');
+                LEADERBOARD_DISPLAY.classList.remove('hidden');
+                CONTENT_WRAPPER.classList.remove('hidden'); 
                 
                 loginSuccess(storedUid, storedName);
             } else {
-                showLoginScreen(); 
+                showLoginForm(); // ไม่มีข้อมูลเก่า ให้แสดงฟอร์ม Login
             }
             
+            // โหลดตารางอันดับเสมอ (แม้ว่าจะถูกซ่อนอยู่)
             fetchAndDisplayLeaderboard();
         }
 
