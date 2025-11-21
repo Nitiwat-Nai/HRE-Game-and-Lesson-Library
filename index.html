@@ -45,9 +45,9 @@
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             text-align: center;
-            max-width: 500px; /* ขยายกว้างกว่า login-box เดิมเล็กน้อย */
+            max-width: 500px; 
             width: 90%;
-            margin: 40px auto; /* จัดให้อยู่กลางหน้า */
+            margin: 40px auto; 
         }
         #login-form-container h3 {
             color: #007bff;
@@ -210,6 +210,7 @@
             
             <div class="link-grid">
                 
+                <div class="card"><div class="card-content"><h3>English Word Snake (ใหม่!)</h3><p>เกมงูคำศัพท์สุดสนุก ฝึกการสร้างและค้นหาคำศัพท์ภาษาอังกฤษในตาราง</p><a href="https://nitiwat-nai.github.io/English-Word-Snake/" target="_blank">เข้าเล่นเกม</a></div></div>
                 <div class="card"><div class="card-content"><h3>Preposition Master</h3><p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p><a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เข้าเล่นเกม</a></div></div>
                 <div class="card"><div class="card-content"><h3>Word Icons Match Game</h3><p>เกมจับคู่คำศัพท์กับไอคอนสนุก ๆ ฝึกทักษะการจำคำนามและกริยาพื้นฐาน</p><a href="https://nitiwat-nai.github.io/Word-Icons-Match-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
                 <div class="card"><div class="card-content"><h3>Irregular Verbs (กริยา 3 ช่อง)</h3><p>บทเรียนและแบบฝึกหัดสำคัญสำหรับกริยาที่ไม่ปกติ (Irregular Verbs) ที่ใช้บ่อย</p><a href="https://nitiwat-nai.github.io/Irregular-Verbs/" target="_blank">เข้าสู่บทเรียน</a></div></div>
@@ -227,11 +228,10 @@
                 <div class="card"><div class="card-content"><h3>Word Journey Prefix</h3><p>การเรียนรู้คำศัพท์จากการทำความเข้าใจส่วนนำหน้า (Prefix) ของคำ</p><a href="https://nitiwat-nai.github.io/word-journey-prefix/" target="_blank">เข้าสู่บทเรียน</a></div></div>
                 
             </div>
-
-        </div>
+            </div>
 
         <footer>
-            <p>&copy; 2025 Home-Run English. เข้าชมเพจ: <a href="[ใส่ลิงก์เพจ Facebook ของคุณที่นี่]" target="_blank">Home-Run English Facebook Page</a></p>
+            <p>&copy; 2025 Home-Run English. เข้าชมเพจ: <a href="URL_เพจ_Facebook_จริงของคุณ" target="_blank">Home-Run English Facebook Page</a></p>
             <p>สร้างขึ้นเพื่อการเรียนรู้ภาษาอังกฤษอย่างสนุกสนาน</p>
         </footer>
     </div>
@@ -263,9 +263,9 @@
         const CONTENT_WRAPPER = document.getElementById('content-wrapper');
         const DISPLAY_USERNAME = document.getElementById('display-username');
         const DISPLAY_LOGIN_COUNT = document.getElementById('display-login-count-days'); 
-        const LEADERBOARD_DISPLAY = document.getElementById('leaderboard-display'); // องค์ประกอบใหม่สำหรับแสดงตารางอันดับ
+        const LEADERBOARD_DISPLAY = document.getElementById('leaderboard-display'); 
         const LEADERBOARD_DATA = document.getElementById('leaderboard-data');
-        const LOGIN_FORM_CONTAINER = document.getElementById('login-form-container'); // องค์ประกอบใหม่สำหรับฟอร์ม Login
+        const LOGIN_FORM_CONTAINER = document.getElementById('login-form-container'); 
         const USERNAME_INPUT = document.getElementById('username-input');
         const LOGIN_ERROR_MESSAGE = document.getElementById('login-error-message');
         const USER_INFO_BAR = document.getElementById('user-info-bar');
@@ -289,9 +289,9 @@
         // ====================================================================
         
         function showLoginForm() {
-            LOGIN_FORM_CONTAINER.classList.remove('hidden'); // แสดงฟอร์ม Login
-            LEADERBOARD_DISPLAY.classList.add('hidden');    // ซ่อนตารางอันดับ
-            CONTENT_WRAPPER.classList.add('hidden');        // ซ่อนเนื้อหาหลัก
+            LOGIN_FORM_CONTAINER.classList.remove('hidden'); 
+            LEADERBOARD_DISPLAY.classList.add('hidden');    
+            CONTENT_WRAPPER.classList.add('hidden');        
             USERNAME_INPUT.focus();
         }
 
@@ -309,10 +309,10 @@
             localStorage.setItem('homerun_auth_name', name);
             localStorage.setItem('homerun_auth_uid', uniqueId);
             
-            // *** คำสั่งสำคัญ: เมื่อล็อกอินสำเร็จ ให้แสดงเนื้อหาหลักและตารางอันดับ ***
-            LOGIN_FORM_CONTAINER.classList.add('hidden');       // ซ่อนฟอร์ม Login
-            LEADERBOARD_DISPLAY.classList.remove('hidden');     // แสดงตารางอันดับ
-            CONTENT_WRAPPER.classList.remove('hidden');         // แสดงเนื้อหาหลัก
+            // เมื่อล็อกอินสำเร็จ ให้แสดงเนื้อหาหลักและตารางอันดับ
+            LOGIN_FORM_CONTAINER.classList.add('hidden');       
+            LEADERBOARD_DISPLAY.classList.remove('hidden');     
+            CONTENT_WRAPPER.classList.remove('hidden');         
 
             loginSuccess(uniqueId, name);
         }
@@ -323,7 +323,6 @@
             
             DISPLAY_USERNAME.textContent = userName;
             
-            // ฟังก์ชันนี้รับผิดชอบการเรียก Firebase เพื่อเพิ่ม Daily Count เท่านั้น
             incrementDailyLoginCount(uid, name); 
         }
         
@@ -361,7 +360,6 @@
                     fetchAndDisplayLeaderboard(); 
                 } else if (error) {
                     console.error("Transaction failed: ", error);
-                    // หากเกิดข้อผิดพลาดในการเขียนข้อมูล ให้พยายามดึงจำนวนวันล่าสุดมาแสดง
                     database.ref('leaderboard/' + uid + '/loginCount').once('value', (s) => {
                         DISPLAY_LOGIN_COUNT.textContent = s.val() || 0;
                     });
@@ -388,7 +386,6 @@
                 showLoginForm(); // ไม่มีข้อมูลเก่า ให้แสดงฟอร์ม Login
             }
             
-            // โหลดตารางอันดับเสมอ (แม้ว่าจะถูกซ่อนอยู่)
             fetchAndDisplayLeaderboard();
         }
 
