@@ -6,163 +6,306 @@
     <title>Home-Run English: คลังเกมและบทเรียนพิเศษ</title>
     <link rel="icon" href="https://nitiwat-nai.github.io/favicon.ico" type="image/x-icon">
     
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        /* CSS ทั้งหมด */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f9;
-            color: #333;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .header-logo {
-            width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid rgba(255, 255, 255, 0.5);
-        }
-        .hidden {
-            display: none;
-        }
-        
-        /* CSS สำหรับ ฟอร์ม Login ในหน้าหลัก */
-        #login-form-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            text-align: center;
-            max-width: 500px; 
-            width: 90%;
-            margin: 40px auto; 
-        }
-        #login-form-container h3 {
-            color: #007bff;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-        #login-form-container input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-        #login-form-container button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s;
-        }
-        #login-form-container button:hover {
-            background-color: #218838;
+        /* --- Modern CSS Variables --- */
+        :root {
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --accent-color: #ff5858;
+            --text-dark: #333;
+            --text-light: #fff;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --shadow: 0 10px 20px rgba(0,0,0,0.05);
+            --shadow-hover: 0 15px 30px rgba(0,0,0,0.1);
         }
 
-        /* CSS สำหรับ UI และ Leaderboard */
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Header Section --- */
+        header {
+            background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .header-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Login & Dashboard Containers --- */
+        #leaderboard-container, #login-form-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin: 0 auto 40px;
+            max-width: 800px;
+            text-align: center;
+            border: 1px solid #e1e8ed;
+        }
+
+        #login-form-container { max-width: 450px; }
+
+        h2, h3 { color: #0061ff; font-weight: 600; }
+
+        /* --- Form Elements --- */
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Kanit', sans-serif;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0061ff;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Kanit', sans-serif;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+        }
+
+        /* --- Leaderboard Table --- */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            text-align: left;
+        }
+
+        .leaderboard-table th {
+            color: #8898aa;
+            font-weight: 500;
+            padding: 10px 15px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+
+        .leaderboard-table td {
+            background-color: #f8f9fe;
+            padding: 15px;
+            font-weight: 400;
+        }
+
+        .leaderboard-table tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        .leaderboard-table tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+        /* Top 3 Highlighting */
+        .leaderboard-table tr:nth-child(1) td { background-color: #fff8e1; color: #ffb300; font-weight: 600; border: 1px solid #ffe082; }
+        .leaderboard-table tr:nth-child(2) td { background-color: #f5f5f5; color: #757575; font-weight: 600; }
+        .leaderboard-table tr:nth-child(3) td { background-color: #fbe9e7; color: #d84315; font-weight: 600; }
+
+        /* --- User Info Bar --- */
         #user-info-bar {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            background: white;
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 50px;
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        #leaderboard-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            margin-bottom: 40px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        #leaderboard-container h2 {
-            color: #d9534f;
-            text-align: center;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        .leaderboard-table th, .leaderboard-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        .leaderboard-table th {
-            background-color: #f9f9f9;
-            color: #555;
-            font-weight: bold;
-        }
-        .leaderboard-table tr:nth-child(1) td {
-            font-weight: bold;
-            color: #e6b300; 
-            background-color: #fffac8;
-        }
-        .leaderboard-table tr:nth-child(2) td {
-            color: #a6a6a6; 
-        }
-        .leaderboard-table tr:nth-child(3) td {
-            color: #b87333; 
+            box-shadow: var(--shadow);
+            border-left: 5px solid #38ef7d;
         }
 
+        #user-info-bar button {
+            background: none;
+            color: #ff5858;
+            padding: 0;
+            width: auto;
+            font-size: 0.9em;
+            text-decoration: underline;
+        }
+
+        /* --- Card Grid --- */
         .link-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
-            padding-top: 30px;
+            padding: 10px;
         }
+
         .card {
-            background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; border-left: 5px solid #007bff;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
         }
+
         .card:hover {
-            transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
         }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #0061ff, #60efff);
+        }
+
         .card-content {
-            padding: 20px;
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
+
         .card-content h3 {
-            color: #007bff; margin-top: 0; font-size: 1.4em; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px;
+            margin: 0 0 10px;
+            font-size: 1.25em;
+            color: #2d3436;
         }
+
         .card-content p {
-            font-size: 0.95em; color: #555; min-height: 40px;
+            color: #636e72;
+            font-size: 0.95em;
+            flex-grow: 1;
+            margin-bottom: 20px;
         }
+
         .card-content a {
-            display: block; width: 100%; padding: 10px; background-color: #28a745; color: white; text-align: center; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: bold; transition: background-color 0.2s;
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #f1f3f5;
+            color: #0061ff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
+
         .card-content a:hover {
-            background-color: #218838;
+            background-color: #0061ff;
+            color: white;
         }
+
+        /* New Label Style */
+        h3 span.new-badge {
+            background-color: #ff5858;
+            color: white;
+            font-size: 0.6em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        /* --- Footer --- */
         footer {
-            text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd; font-size: 0.9em; color: #777;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            color: #8898aa;
+            font-size: 0.9em;
+            border-top: 1px solid #e1e8ed;
         }
+        
+        footer a { color: #0061ff; text-decoration: none; font-weight: 500; }
+
+        /* Notification Box */
+        .notification-box {
+            background-color: #e3f2fd;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            color: #0d47a1;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
         .illustration img {
-            max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 40px 20px; border-radius: 0 0 20px 20px; }
+            header h1 { font-size: 1.8em; }
+            .container { padding: 15px; }
         }
     </style>
 </head>
@@ -175,65 +318,204 @@
             <p>คลังเกมและบทเรียนภาษาอังกฤษพิเศษสำหรับผู้ติดตาม</p>
         </header>
         
-        <div id="leaderboard-container">
-            <div id="login-form-container">
-                <h3>🔑 ยืนยันตัวตนเพื่อเข้าสู่คลังเกม</h3>
-                <p>โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับสถิติการเข้าชม)</p>
-                <input type="text" id="username-input" placeholder="กรอกชื่อเข้าใช้งานของคุณ" required>
-                <p id="login-error-message" style="color: red; margin-bottom: 15px; font-size: 0.9em;" class="hidden">กรุณากรอกชื่อเข้าใช้งาน</p>
-                <button id="login-button" onclick="handleManualLogin()">เข้าสู่ระบบ</button>
-            </div>
+        <div class="container">
+            <div id="leaderboard-container">
+                <div id="login-form-container">
+                    <h3>🔐 ยืนยันตัวตนเพื่อเข้าสู่ระบบ</h3>
+                    <p style="color: #666; margin-bottom: 20px;">โปรดระบุชื่อเข้าใช้งาน (ใช้ชื่อเดียวกับ Facebook เพื่อการจัดอันดับ)</p>
+                    <input type="text" id="username-input" placeholder="กรอกชื่อของคุณที่นี่..." required>
+                    <p id="login-error-message" style="color: #ff5858; margin-bottom: 15px; font-size: 0.9em;" class="hidden">⚠ กรุณากรอกชื่อเข้าใช้งาน</p>
+                    <button id="login-button" onclick="handleManualLogin()">🚀 เข้าสู่ระบบ</button>
+                </div>
 
-            <div id="leaderboard-display" class="hidden">
-                <h2>🏆 ตารางจัดอันดับผู้เข้าร่วม (ตามจำนวนวันเข้าใช้งาน)</h2>
-                <div id="leaderboard-data">
-                    <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+                <div id="leaderboard-display" class="hidden">
+                    <h2 style="margin-bottom: 20px;">🏆 Top Active Students <br><span style="font-size:0.6em; color:#888; font-weight:400;">(จัดอันดับตามจำนวนวันที่เข้าใช้งาน)</span></h2>
+                    <div id="leaderboard-data">
+                        <p style="text-align: center; color: #999;">กำลังโหลดข้อมูล...</p>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div id="content-wrapper" class="hidden container">
             
             <div id="user-info-bar">
-                <span>👋 ยินดีต้อนรับคุณ: <strong id="display-username"></strong> (สถิติการเข้าใช้งาน: <strong id="display-login-count-days">0</strong> วัน)</span>
-                <button onclick="localStorage.clear(); window.location.reload();" style="background: none; border: none; color: #856404; cursor: pointer;">(ออกจากระบบ)</button>
+                <div>
+                    👋 สวัสดีคุณ: <strong id="display-username" style="color:#0061ff;"></strong> 
+                    <span style="margin-left: 10px; color:#555;">| 📅 สถิติ: <strong id="display-login-count-days">0</strong> วัน</span>
+                </div>
+                <button onclick="localStorage.clear(); window.location.reload();">ออกจากระบบ</button>
             </div>
 
-            <div class="illustration">
+            <div class="illustration" style="text-align: center;">
                 <img src="https://github.com/Nitiwat-Nai/HRE-Game-and-Lesson-Library/blob/main/HOME-RUN.png?raw=true" alt="Home-Run English Illustration">
             </div>
 
-            <h2>🚀 เลือกเกมหรือบทเรียนที่ต้องการได้เลย</h2>
-            <p style="margin-top: -10px; font-size: 0.95em; color: #007bff; font-weight: bold;">
-                เมื่อเข้าสู่เกมหรือบทเรียนแล้ว ให้ใช้ปุ่ม **ย้อนกลับ (Back)** ของเบราว์เซอร์เพื่อกลับมาหน้านี้
-            </p>
-            <p>เพื่อประสบการณ์การเรียนรู้ที่สนุกสนานและมีประสิทธิภาพ! (คลิกที่ปุ่ม 'เข้าเล่น' ด้านล่างแต่ละหัวข้อ)</p>
+            <div class="notification-box">
+                <span>💡 <strong>คำแนะนำ:</strong> เมื่อเข้าสู่เกมแล้ว ให้ใช้ปุ่ม <strong>ย้อนกลับ (Back)</strong> ของเบราว์เซอร์เพื่อกลับมาหน้านี้</span>
+            </div>
+
+            <h2 style="text-align: center; margin-bottom: 30px;">🚀 เลือกเกมหรือบทเรียน</h2>
             
             <div class="link-grid">
 
-                <div class="card"><div class="card-content"><h3>Othello Vocabulary Battle (ใหม่!)</h3><p>เกมกระดานโอเทลโล (หมากหนีบ) ที่ต้องใช้กลยุทธ์และคำศัพท์ภาษาอังกฤษในการเอาชนะ</p><a href="https://nitiwat-nai.github.io/Othello-Vocabulary-Battle/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Typer Spelling Game</h3><p>เกมฝึกการสะกดคำศัพท์ (Spelling) โดยการพิมพ์ให้ถูกต้องและรวดเร็ว</p><a href="https://nitiwat-nai.github.io/Word-Typer-Spelling-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>English Word Snake</h3><p>เกมงูคำศัพท์สุดสนุก ฝึกการสร้างและค้นหาคำศัพท์ภาษาอังกฤษในตาราง</p><a href="https://nitiwat-nai.github.io/English-Word-Snake/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Preposition Master</h3><p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p><a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Icons Match Game</h3><p>เกมจับคู่คำศัพท์กับไอคอนสนุก ๆ ฝึกทักษะการจำคำนามและกริยาพื้นฐาน</p><a href="https://nitiwat-nai.github.io/Word-Icons-Match-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Irregular Verbs (กริยา 3 ช่อง)</h3><p>บทเรียนและแบบฝึกหัดสำคัญสำหรับกริยาที่ไม่ปกติ (Irregular Verbs) ที่ใช้บ่อย</p><a href="https://nitiwat-nai.github.io/Irregular-Verbs/" target="_blank">เข้าสู่บทเรียน</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Search Game (ค้นหาคำศัพท์)</h3><p>เกมค้นหาคำศัพท์สุดคลาสสิก เพื่อฝึกการสังเกตและจดจำตัวสะกด</p><a href="https://nitiwat-nai.github.io/Word-Search-Game/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>WordWise Hangman</h3><p>เกมแขวนคอในรูปแบบที่ออกแบบมาเพื่อฝึกการเดาคำศัพท์จากบริบท</p><a href="https://nitiwat-nai.github.io/WordWise-Hangman/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Puzzle Word Trace</h3><p>เกมต่อคำศัพท์แบบปริศนา ฝึกการจัดเรียงตัวอักษรให้เป็นคำที่ถูกต้อง</p><a href="https://nitiwat-nai.github.io/Puzzle-Word-Trace/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Alternatives to Very Challenge</h3><p>บทเรียนท้าทายเพื่อเรียนรู้คำศัพท์ขั้นสูง แทนการใช้คำว่า "Very" ซ้ำ ๆ</p><a href="https://nitiwat-nai.github.io/Alternatives-to-Very-Challenge/" target="_blank">เข้าสู่บทเรียน</a></div></div>
-                <div class="card"><div class="card-content"><h3>Antonyms Quiz Challenge</h3><p>แบบทดสอบท้าทายความรู้คำศัพท์ตรงข้าม (Antonyms) เพื่อเพิ่มคลังคำศัพท์</p><a href="https://nitiwat-nai.github.io/Antonyms-Quiz-Challenge/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>A-Z Alphabet Fun</h3><p>บทเรียนและเกมสนุก ๆ สำหรับเด็ก เพื่อเรียนรู้ตัวอักษร A-Z และคำศัพท์พื้นฐาน</p><a href="https://nitiwat-nai.github.io/a-z-alphabet-fun/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Homophones Game</h3><p>เกมทดสอบความเข้าใจคำที่มีเสียงเหมือนแต่ความหมายและสะกดต่างกัน (Homophones)</p><a href="https://nitiwat-nai.github.io/homophones-game/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Vocab for Kids (คำศัพท์เด็ก)</h3><p>ชุดคำศัพท์ที่ออกแบบมาสำหรับเด็กโดยเฉพาะ พร้อมภาพประกอบน่ารัก</p><a href="https://nitiwat-nai.github.io/vocab-for-kids/" target="_blank">เข้าสู่บทเรียน</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Journey</h3><p>การเดินทางของคำศัพท์ ที่ให้ผู้เรียนค้นพบคำใหม่ ๆ ในแต่ละก้าว</p><a href="https://nitiwat-nai.github.io/word-Journey/" target="_blank">เข้าสู่เกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Vocab for Kids: Sentence Building</h3><p>ฝึกการสร้างประโยคพื้นฐานสำหรับเด็ก โดยใช้คำศัพท์ที่เรียนรู้มา</p><a href="https://nitiwat-nai.github.io/vocap-for-kids-sentence/" target="_blank">เข้าสู่บทเรียน</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Pop Match</h3><p>เกมจับคู่คำศัพท์แบบป๊อปอัป ที่ต้องความเร็วและความแม่นยำ</p><a href="https://nitiwat-nai.github.io/word-pop-match/" target="_blank">เข้าเล่นเกม</a></div></div>
-                <div class="card"><div class="card-content"><h3>Word Journey Prefix</h3><p>การเรียนรู้คำศัพท์จากการทำความเข้าใจส่วนนำหน้า (Prefix) ของคำ</p><a href="https://nitiwat-nai.github.io/word-journey-prefix/" target="_blank">เข้าสู่บทเรียน</a></div></div>
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Vocab Slide Puzzle <span class="new-badge">NEW!</span></h3>
+                        <p>เกมปริศนาเลื่อนภาพคำศัพท์ ฝึกสมองและการจดจำคำศัพท์อย่างสนุกสนาน</p>
+                        <a href="https://nitiwat-nai.github.io/Vocab-Slide-Puzzle/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Othello Vocabulary</h3>
+                        <p>เกมกระดานโอเทลโล (หมากหนีบ) ที่ต้องใช้กลยุทธ์และคำศัพท์ในการเอาชนะ</p>
+                        <a href="https://nitiwat-nai.github.io/Othello-Vocabulary-Battle/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Typer Spelling</h3>
+                        <p>เกมฝึกการสะกดคำศัพท์ (Spelling) โดยการพิมพ์ให้ถูกต้องและรวดเร็ว</p>
+                        <a href="https://nitiwat-nai.github.io/Word-Typer-Spelling-Game/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>English Word Snake</h3>
+                        <p>เกมงูคำศัพท์สุดสนุก ฝึกการสร้างและค้นหาคำศัพท์ภาษาอังกฤษในตาราง</p>
+                        <a href="https://nitiwat-nai.github.io/English-Word-Snake/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Preposition Master</h3>
+                        <p>เกมฝึกฝนการใช้คำบุพบท (Preposition) อย่างแม่นยำในบริบทที่ถูกต้อง</p>
+                        <a href="https://nitiwat-nai.github.io/Preposition-Master/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Icons Match</h3>
+                        <p>เกมจับคู่คำศัพท์กับไอคอนสนุก ๆ ฝึกทักษะการจำคำนามและกริยาพื้นฐาน</p>
+                        <a href="https://nitiwat-nai.github.io/Word-Icons-Match-Game/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Irregular Verbs</h3>
+                        <p>บทเรียนและแบบฝึกหัดสำคัญสำหรับกริยาที่ไม่ปกติ (Irregular Verbs)</p>
+                        <a href="https://nitiwat-nai.github.io/Irregular-Verbs/" target="_blank">เข้าสู่บทเรียน</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Search Game</h3>
+                        <p>เกมค้นหาคำศัพท์สุดคลาสสิก เพื่อฝึกการสังเกตและจดจำตัวสะกด</p>
+                        <a href="https://nitiwat-nai.github.io/Word-Search-Game/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>WordWise Hangman</h3>
+                        <p>เกมแขวนคอในรูปแบบที่ออกแบบมาเพื่อฝึกการเดาคำศัพท์จากบริบท</p>
+                        <a href="https://nitiwat-nai.github.io/WordWise-Hangman/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Puzzle Word Trace</h3>
+                        <p>เกมต่อคำศัพท์แบบปริศนา ฝึกการจัดเรียงตัวอักษรให้เป็นคำที่ถูกต้อง</p>
+                        <a href="https://nitiwat-nai.github.io/Puzzle-Word-Trace/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Alternative "Very"</h3>
+                        <p>บทเรียนท้าทายเพื่อเรียนรู้คำศัพท์ขั้นสูง แทนการใช้คำว่า "Very" ซ้ำ ๆ</p>
+                        <a href="https://nitiwat-nai.github.io/Alternatives-to-Very-Challenge/" target="_blank">เข้าสู่บทเรียน</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Antonyms Quiz</h3>
+                        <p>แบบทดสอบท้าทายความรู้คำศัพท์ตรงข้าม (Antonyms) เพื่อเพิ่มคลังคำศัพท์</p>
+                        <a href="https://nitiwat-nai.github.io/Antonyms-Quiz-Challenge/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>A-Z Alphabet Fun</h3>
+                        <p>บทเรียนและเกมสนุก ๆ สำหรับเด็ก เพื่อเรียนรู้ตัวอักษร A-Z และคำศัพท์</p>
+                        <a href="https://nitiwat-nai.github.io/a-z-alphabet-fun/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Homophones Game</h3>
+                        <p>เกมทดสอบความเข้าใจคำที่มีเสียงเหมือนแต่ความหมายและสะกดต่างกัน</p>
+                        <a href="https://nitiwat-nai.github.io/homophones-game/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Vocab for Kids</h3>
+                        <p>ชุดคำศัพท์ที่ออกแบบมาสำหรับเด็กโดยเฉพาะ พร้อมภาพประกอบน่ารัก</p>
+                        <a href="https://nitiwat-nai.github.io/vocab-for-kids/" target="_blank">เข้าสู่บทเรียน</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Journey</h3>
+                        <p>การเดินทางของคำศัพท์ ที่ให้ผู้เรียนค้นพบคำใหม่ ๆ ในแต่ละก้าว</p>
+                        <a href="https://nitiwat-nai.github.io/word-Journey/" target="_blank">เข้าสู่เกม</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Sentence Building</h3>
+                        <p>ฝึกการสร้างประโยคพื้นฐานสำหรับเด็ก โดยใช้คำศัพท์ที่เรียนรู้มา</p>
+                        <a href="https://nitiwat-nai.github.io/vocap-for-kids-sentence/" target="_blank">เข้าสู่บทเรียน</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Pop Match</h3>
+                        <p>เกมจับคู่คำศัพท์แบบป๊อปอัป ที่ต้องความเร็วและความแม่นยำ</p>
+                        <a href="https://nitiwat-nai.github.io/word-pop-match/" target="_blank">เริ่มเล่นเลย</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Word Journey Prefix</h3>
+                        <p>การเรียนรู้คำศัพท์จากการทำความเข้าใจส่วนนำหน้า (Prefix) ของคำ</p>
+                        <a href="https://nitiwat-nai.github.io/word-journey-prefix/" target="_blank">เข้าสู่บทเรียน</a>
+                    </div>
+                </div>
                 
             </div>
             </div>
 
         <footer>
-            <p>&copy; 2025 Home-Run English. เข้าชมเพจ: <a href="URL_เพจ_Facebook_จริงของคุณ" target="_blank">Home-Run English Facebook Page</a></p>
+            <p>&copy; 2025 Home-Run English. ติดตามเรา: <a href="https://www.facebook.com/HomeRunEnglishPage" target="_blank">Home-Run English Facebook Page</a></p>
             <p>สร้างขึ้นเพื่อการเรียนรู้ภาษาอังกฤษอย่างสนุกสนาน</p>
         </footer>
     </div>
@@ -245,7 +527,6 @@
         // ====================================================================
         
         const firebaseConfig = {
-            // *** อย่าลืมแทนที่ด้วย config ของคุณ หากมีการเปลี่ยนแปลง ***
             apiKey: "AIzaSyDYkbaEjaC2RUrv6vaWq4k5psrMr1mCjRE", 
             authDomain: "homerun-english-hub.firebaseapp.com",
             projectId: "homerun-english-hub",
@@ -270,13 +551,11 @@
         const LOGIN_FORM_CONTAINER = document.getElementById('login-form-container'); 
         const USERNAME_INPUT = document.getElementById('username-input');
         const LOGIN_ERROR_MESSAGE = document.getElementById('login-error-message');
-        const USER_INFO_BAR = document.getElementById('user-info-bar');
         
         let userName = null;
         let userUid = null;
         
         function hashString(str) {
-            // ฟังก์ชันสร้าง Unique ID จากชื่อผู้ใช้
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 const char = str.charCodeAt(i);
@@ -287,7 +566,7 @@
         }
 
         // ====================================================================
-        // 3. LOGIN FUNCTIONS (Inline Login)
+        // 3. LOGIN FUNCTIONS
         // ====================================================================
         
         function showLoginForm() {
@@ -311,7 +590,7 @@
             localStorage.setItem('homerun_auth_name', name);
             localStorage.setItem('homerun_auth_uid', uniqueId);
             
-            // เมื่อล็อกอินสำเร็จ ให้แสดงเนื้อหาหลักและตารางอันดับ
+            // ซ่อนหน้า Login ทันที
             LOGIN_FORM_CONTAINER.classList.add('hidden');       
             LEADERBOARD_DISPLAY.classList.remove('hidden');     
             CONTENT_WRAPPER.classList.remove('hidden');         
@@ -322,9 +601,7 @@
         function loginSuccess(uid, name) {
             userUid = uid;
             userName = name;
-            
             DISPLAY_USERNAME.textContent = userName;
-            
             incrementDailyLoginCount(uid, name); 
         }
         
@@ -341,7 +618,6 @@
             userRef.transaction((currentData) => {
                 if (currentData) {
                     currentData.name = name; 
-                    
                     if (currentData.lastVisitDate !== today) {
                         currentData.loginCount = (currentData.loginCount || 0) + 1;
                         currentData.lastVisitDate = today;
@@ -378,16 +654,13 @@
             const storedUid = localStorage.getItem('homerun_auth_uid');
 
             if (storedName && storedUid) {
-                // เมื่อมีข้อมูลเก่า ให้แสดงเนื้อหาหลักและซ่อนฟอร์ม Login
                 LOGIN_FORM_CONTAINER.classList.add('hidden');
                 LEADERBOARD_DISPLAY.classList.remove('hidden');
                 CONTENT_WRAPPER.classList.remove('hidden'); 
-                
                 loginSuccess(storedUid, storedName);
             } else {
-                showLoginForm(); // ไม่มีข้อมูลเก่า ให้แสดงฟอร์ม Login
+                showLoginForm(); 
             }
-            
             fetchAndDisplayLeaderboard();
         }
 
@@ -429,20 +702,17 @@
 
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบ Firebase Config หรือ Security Rules)</p>';
+                LEADERBOARD_DATA.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถโหลดตารางอันดับได้ (โปรดตรวจสอบการตั้งค่า Firebase)</p>';
             });
         }
 
         // ====================================================================
-        // 7. EVENT LISTENERS (รองรับการกด Enter key)
+        // 7. EVENT LISTENERS
         // ====================================================================
         
         window.onload = function() {
             checkLocalStorageAuth();
-
-            // เพิ่ม Event Listener สำหรับการกด Enter บนช่อง input
             USERNAME_INPUT.addEventListener('keypress', function(event) {
-                // KeyCode 13 คือปุ่ม Enter
                 if (event.key === 'Enter') { 
                     event.preventDefault(); 
                     handleManualLogin();
